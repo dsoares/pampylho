@@ -1,25 +1,34 @@
-# Pamela: yet another Python wrapper for PAM
+# Pampylho: yet another Python wrapper for PAM
 
-There seems to be a glut of Python wrappers for PAM that have since been abandoned.
-This repo merges two separate efforts:
+My own Python wrapper for PAM, based on these projects:
 
 - [gnosek/python-pam](https://github.com/gnosek/python-pam)
-  - adds wrappers for a few more calls, e.g. opening sessions
-  - raises PamError on failure instead of returning False, with informative error messages
 - [simplepam](https://github.com/leonnnn/python3-simplepam)
-  - adds Python 3 support
-  - resets credentials after authentication, apparently for kerberos users
+- [minrk/pamela](https://github.com/minrk/pamela)
+
+This is just a fork from project
+[minrk/pamela](https://github.com/minrk/pamela), with a minor modification.
 
 ## Why?
 
-Both projects appear to be abandoned, with no response to issues or pull requests in at least a year, and I need it for [JupyterHub](https://github.com/jupyter/jupyterhub).
+I need this minor modification for my
+[JupyterHub](https://github.com/jupyter/jupyterhub) environment, which
+uses the [pam-mount](http://pam-mount.sourceforge.net/) PAM module.
+
+After some more testing, I'll open a pull request to the
+main [minrk/pamela](https://github.com/minrk/pamela) project.
+
 
 ## Use it
 
 Install:
 
-    pip install pamela
+    pip install git+https://github.com/dsoares/pampylho.git
 
-Test:
 
-    python -m pamela -a `whoami`
+## The name
+
+**Pampilho** is a pastry from Santarém, Portugal. It's a thinly rolled
+sponge cake filled with egg yolk cream called *“Ovos-moles (soft
+eggs)”* (see
+[pampilho](https://eatingtheworld.wordpress.com/2012/12/07/portuguese-pastry-post-doc-pampilhos-de-santarem/)).

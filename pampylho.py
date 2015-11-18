@@ -1,6 +1,7 @@
 # (c) 2007 Chris AtLee <chris@atlee.ca>
 # (c) 2010 Grzegorz Nosek <root@localdomain.pl>
 # (c) 2015 Min RK <benjaminrk@gmail.com>
+# (c) 2015 Diana Soares <diana.soares@gmail.com>
 # Licensed under the MIT license:
 # http://www.opensource.org/licenses/mit-license.php
 """

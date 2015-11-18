@@ -13,14 +13,14 @@ from distutils.core import setup
 if 'bdist_wheel' in sys.argv:
     import setuptools
 
-with open('pamela.py') as f:
+with open('pampylho.py') as f:
     for line in f:
         if line.startswith('__version__'):
             version_ns = {}
             exec(line, version_ns)
             version = version_ns['__version__']
 
-setup(name='pamela',
+setup(name='pampylho',
       version=version,
       description="PAM interface using ctypes",
       long_description=__doc__,
@@ -35,9 +35,9 @@ setup(name='pamela',
           "Topic :: System :: Systems Administration :: Authentication/Directory"
           ],
       keywords=['pam', 'authentication'],
-      author='Min RK',
-      author_email='benjaminrk@gmail.com',
-      url='http://github.com/minrk/pamela',
+      author='Diana Soares',
+      author_email='diana.soares@gmail.com',
+      url='http://github.com/dsoares/pampylho',
       license='MIT',
-      py_modules=["pamela"],
+      py_modules=["pampylho"],
   )
