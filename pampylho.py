@@ -269,6 +269,11 @@ def authenticate(username, password=None, service='login', encoding='utf-8', res
     if retval == 0 and resetcred:
         PAM_SETCRED(handle, PAM_REINITIALIZE_CRED)
 
+    # open_session before the handle gets destroyed with pam_end
+    # (ex: pam_mount needs state info stored previously in the auth facility)
+    if retval == 0:
+        retval = PAM_OPEN_SESSION(handle, 0)
+
     return pam_end(handle, retval)
 
 def open_session(username, service='login', encoding='utf-8'):
