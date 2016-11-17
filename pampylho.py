@@ -198,6 +198,26 @@ def default_conv(n_messages, messages, p_response, app_data):
             print(repr(messages[i].contents))
     return 0
 
+def new_simple_password_conv(passwords, encoding):
+    passwords = [_cast_bytes(password, encoding) for password in passwords]
+    passwords.reverse()
+    @CONV_FUNC
+    def conv_func(n_messages, messages, p_response, app_data):
+        """Simple conversation function that responds to any
+        prompt where the echo is off with the supplied password"""
+        # Create an array of n_messages response objects
+        addr = CALLOC(n_messages, sizeof(PamResponse))
+        p_response[0] = cast(addr, POINTER(PamResponse))
+        for i in range(n_messages):
+            if messages[i].contents.msg_style == PAM_PROMPT_ECHO_OFF:
+                if not passwords:
+                    return 1
+                pw_copy = STRDUP(passwords.pop())
+                p_response.contents[i].resp = pw_copy
+                p_response.contents[i].resp_retcode = 0
+        return 0
+    return conv_func
+
 def pam_start(service, username, conv_func=default_conv, encoding='utf8'):
     service = _cast_bytes(service, encoding)
     username = _cast_bytes(username, encoding)
@@ -247,19 +267,7 @@ def authenticate(username, password=None, service='login', encoding='utf-8', res
         conv_func = default_conv
     else:
         password = _cast_bytes(password, encoding)
-        @CONV_FUNC
-        def conv_func(n_messages, messages, p_response, app_data):
-            """Simple conversation function that responds to any
-            prompt where the echo is off with the supplied password"""
-            # Create an array of n_messages response objects
-            addr = CALLOC(n_messages, sizeof(PamResponse))
-            p_response[0] = cast(addr, POINTER(PamResponse))
-            for i in range(n_messages):
-                if messages[i].contents.msg_style == PAM_PROMPT_ECHO_OFF:
-                    pw_copy = STRDUP(password)
-                    p_response.contents[i].resp = pw_copy
-                    p_response.contents[i].resp_retcode = 0
-            return 0
+        conv_func = new_simple_password_conv((password, ), encoding)
 
     handle = pam_start(service, username, conv_func=conv_func, encoding=encoding)
 
@@ -289,8 +297,16 @@ def check_account(username, service='login', encoding='utf-8'):
     handle = pam_start(service, username, encoding=encoding)
     return pam_end(handle, PAM_ACCT_MGMT(handle, 0))
 
-def change_password(username, service='login', encoding='utf-8'):
-    handle = pam_start(service, username, encoding=encoding)
+def change_password(username, password=None, service='login', encoding='utf-8'):
+    if password is None:
+        conv_func = default_conv
+    else:
+        # Password x2 to answer the "Retype new UNIX password:" prompt
+        # TODO: If we're not running as root the first prompt will be
+        # 'current password' which we will not answer, so this will not work
+        # in that case.
+        conv_func = new_simple_password_conv((password, password), encoding)
+    handle = pam_start(service, username, conv_func=conv_func, encoding=encoding)
     return pam_end(handle, PAM_CHAUTHTOK(handle, 0))
 
 if __name__ == "__main__":
@@ -358,7 +374,12 @@ if __name__ == "__main__":
             sys.exit(e)
 
     if o.change_password:
+        if o.ask_password:
+            password = getpass.getpass()
+        else:
+            password = None
+
         try:
-            change_password(user, o.service)
+            change_password(user, password, o.service)
         except PAMError as e:
             sys.exit(e)
